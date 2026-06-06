@@ -1,2 +1,142 @@
-  <!DOCTYPE html>
-  <html><body>FreeTune - Coming Soon</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FreeTune</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">♪</span>
+          <span class="logo-text">FreeTune</span>
+        </div>
+        <button class="upload-btn" id="openUpload">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Upload
+        </button>
+      </div>
+
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search songs, artists…" />
+      </div>
+
+      <div class="library-header">
+        <span>Library</span>
+        <span class="song-count" id="songCount">0 songs</span>
+      </div>
+
+      <div class="song-list" id="songList">
+        <div class="empty-state" id="emptyState">
+          <span class="empty-icon">🎵</span>
+          <p>No songs yet</p>
+          <small>Upload your first track!</small>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Player -->
+    <main class="player-area">
+      <div class="now-playing-card">
+
+        <div class="album-art" id="albumArt">
+          <div class="art-bg"></div>
+          <span class="art-note">♪</span>
+          <div class="equalizer" id="equalizer">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <div class="song-meta">
+          <h2 class="now-title" id="nowTitle">No song selected</h2>
+          <p class="now-artist" id="nowArtist">Pick a track from your library</p>
+        </div>
+
+        <div class="progress-section">
+          <span class="time" id="timeCurrent">0:00</span>
+          <div class="progress-track" id="progressTrack">
+            <div class="progress-fill" id="progressFill"></div>
+            <div class="progress-thumb" id="progressThumb"></div>
+          </div>
+          <span class="time" id="timeTotal">0:00</span>
+        </div>
+
+        <div class="controls">
+          <button class="ctrl-btn" id="btnPrev" title="Previous">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+          </button>
+          <button class="ctrl-btn play-pause" id="btnPlay" title="Play / Pause">
+            <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button class="ctrl-btn" id="btnNext" title="Next">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>
+          </button>
+        </div>
+
+        <div class="volume-section">
+          <svg class="vol-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <div class="volume-track" id="volumeTrack">
+            <div class="volume-fill" id="volumeFill" style="width:80%"></div>
+            <input type="range" class="volume-range" id="volumeRange" min="0" max="100" value="80" />
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Upload Song</h3>
+        <button class="modal-close" id="closeUpload">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Song Title</label>
+          <input type="text" id="uploadTitle" placeholder="e.g. Bohemian Rhapsody" />
+        </div>
+        <div class="form-group">
+          <label>Artist</label>
+          <input type="text" id="uploadArtist" placeholder="e.g. Queen" />
+        </div>
+        <div class="form-group">
+          <label>MP3 File</label>
+          <div class="file-drop" id="fileDrop">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32" style="color:var(--accent)"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            <span id="fileDropText">Drop MP3 here or click to browse</span>
+            <input type="file" id="uploadFile" accept=".mp3,audio/mpeg" hidden />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>API Key</label>
+          <input type="password" id="uploadApiKey" placeholder="Your secret API key" />
+          <small>Saved in your browser after first use</small>
+        </div>
+        <div class="upload-feedback" id="uploadFeedback"></div>
+        <button class="submit-btn" id="uploadSubmit">
+          <span id="submitLabel">Upload Song</span>
+          <span id="submitSpinner" style="display:none">Uploading…</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="audioPlayer"></audio>
+  <script src="player.js"></script>
+</body>
+</html>
