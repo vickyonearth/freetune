@@ -50,7 +50,6 @@ const submitSpinner = document.getElementById('submitSpinner');
   audio.volume = 0.8;
   restoreApiKey();
   await loadSongs();
-  setupListeners();
 })();
 
 // ── Load songs ─────────────────────────────────
@@ -115,16 +114,24 @@ function playSong(idx) {
   currentIdx = idx;
   const song = allSongs[idx];
 
-  audio.src = song.url;
-  audio.play();
-  isPlaying = true;
-
   nowTitle.textContent  = song.title;
   nowArtist.textContent = song.artist;
-  albumArt.classList.add('playing');
 
-  updatePlayIcon();
-  renderList(filtered);
+  audio.src = song.url;
+  audio.load();
+
+  audio.play().then(() => {
+    isPlaying = true;
+    albumArt.classList.add('playing');
+    updatePlayIcon();
+    renderList(filtered);
+  }).catch(() => {
+    // Browser blocked autoplay — update UI to paused state so user can tap play
+    isPlaying = false;
+    albumArt.classList.remove('playing');
+    updatePlayIcon();
+    renderList(filtered);
+  });
 }
 
 function togglePlay() {
@@ -134,9 +141,10 @@ function togglePlay() {
     isPlaying = false;
     albumArt.classList.remove('playing');
   } else {
-    audio.play();
-    isPlaying = true;
-    albumArt.classList.add('playing');
+    audio.play().then(() => {
+      isPlaying = true;
+      albumArt.classList.add('playing');
+    }).catch(() => {});
   }
   updatePlayIcon();
   renderList(filtered);
