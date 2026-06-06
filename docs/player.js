@@ -50,6 +50,7 @@ const submitSpinner = document.getElementById('submitSpinner');
   audio.volume = 0.8;
   restoreApiKey();
   await loadSongs();
+  fetch(`${API_URL}/health`).catch(() => {}); // warm up Render on load
 })();
 
 // ── Load songs ─────────────────────────────────
@@ -117,7 +118,7 @@ function playSong(idx) {
   nowTitle.textContent  = song.title;
   nowArtist.textContent = song.artist;
 
-  audio.src = song.url;
+  audio.src = `${API_URL}/api/songs/stream/${song.id}`;
   audio.load();
 
   audio.play().then(() => {
