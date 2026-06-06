@@ -156,12 +156,15 @@ function updatePlayIcon() {
 }
 
 // ── Progress bar ───────────────────────────────
+const playerArea = document.querySelector('.player-area');
+
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
   const pct = (audio.currentTime / audio.duration) * 100;
   progressFill.style.width = `${pct}%`;
   progressThumb.style.left = `${pct}%`;
   timeCurrent.textContent = fmt(audio.currentTime);
+  playerArea.style.setProperty('--progress', `${pct}%`);
 });
 
 audio.addEventListener('loadedmetadata', () => {
@@ -224,12 +227,21 @@ function closeModal() {
 // File drop zone
 fileDrop.addEventListener('click', () => uploadFile.click());
 
+function applyFile(f) {
+  fileDropText.textContent = f.name;
+  fileDrop.classList.add('has-file');
+
+  // Strip extension, normalise separators
+  const base  = f.name.replace(/\.[^.]+$/, '').replace(/_/g, ' ').trim();
+  // Common pattern: "Title - Artist" or "Artist - Title"
+  const parts = base.split(/\s+[-–]\s+/);
+  uploadTitle.value  = parts[0].trim();
+  uploadArtist.value = parts.length >= 2 ? parts[1].trim() : '';
+}
+
 uploadFile.addEventListener('change', () => {
   const f = uploadFile.files[0];
-  if (f) {
-    fileDropText.textContent = f.name;
-    fileDrop.classList.add('has-file');
-  }
+  if (f) applyFile(f);
 });
 
 fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('dragover'); });
@@ -240,8 +252,7 @@ fileDrop.addEventListener('drop', e => {
   const f = e.dataTransfer.files[0];
   if (f && f.type === 'audio/mpeg') {
     uploadFile.files = e.dataTransfer.files;
-    fileDropText.textContent = f.name;
-    fileDrop.classList.add('has-file');
+    applyFile(f);
   }
 });
 
