@@ -39,11 +39,17 @@ const uploadArtist  = document.getElementById('uploadArtist');
 const uploadFile    = document.getElementById('uploadFile');
 const fileDrop      = document.getElementById('fileDrop');
 const fileDropText  = document.getElementById('fileDropText');
+const uploadUrl     = document.getElementById('uploadUrl');
 const uploadApiKey  = document.getElementById('uploadApiKey');
 const uploadSubmit  = document.getElementById('uploadSubmit');
 const uploadFeedback= document.getElementById('uploadFeedback');
 const submitLabel   = document.getElementById('submitLabel');
 const submitSpinner = document.getElementById('submitSpinner');
+const tabBtns       = document.querySelectorAll('.tab-btn');
+const tabFile       = document.getElementById('tabFile');
+const tabUrlPane    = document.getElementById('tabUrl');
+
+let activeTab = 'file';
 
 // ── Init ───────────────────────────────────────
 (async function init() {
@@ -233,6 +239,30 @@ function closeModal() {
   modalBackdrop.classList.remove('open');
 }
 
+// Tab switching
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeTab = btn.dataset.tab;
+    tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+    tabFile.classList.toggle('hidden',    activeTab !== 'file');
+    tabUrlPane.classList.toggle('hidden', activeTab !== 'url');
+    clearFeedback();
+  });
+});
+
+// Auto-populate title/artist from URL filename
+uploadUrl.addEventListener('input', () => {
+  const raw = uploadUrl.value.trim();
+  if (!raw) return;
+  try {
+    const filename = decodeURIComponent(new URL(raw).pathname.split('/').pop());
+    const base     = filename.replace(/\.[^.]+$/, '').replace(/_/g, ' ').trim();
+    const parts    = base.split(/\s+[-–]\s+/);
+    uploadTitle.value  = parts[0].trim();
+    uploadArtist.value = parts.length >= 2 ? parts[1].trim() : '';
+  } catch { /* invalid URL, ignore */ }
+});
+
 // File drop zone
 fileDrop.addEventListener('click', () => uploadFile.click());
 
@@ -269,11 +299,10 @@ fileDrop.addEventListener('drop', e => {
 uploadSubmit.addEventListener('click', async () => {
   const title  = uploadTitle.value.trim();
   const artist = uploadArtist.value.trim();
-  const file   = uploadFile.files[0];
   const apiKey = uploadApiKey.value.trim();
 
-  if (!title || !artist || !file || !apiKey) {
-    showFeedback('error', 'All fields are required.');
+  if (!title || !artist || !apiKey) {
+    showFeedback('error', 'Title, artist and API key are required.');
     return;
   }
 
@@ -282,16 +311,32 @@ uploadSubmit.addEventListener('click', async () => {
   clearFeedback();
 
   try {
-    const form = new FormData();
-    form.append('title', title);
-    form.append('artist', artist);
-    form.append('file', file);
+    let res;
 
-    const res = await fetch(`${API_URL}/api/songs`, {
-      method: 'POST',
-      headers: { 'x-api-key': apiKey },
-      body: form,
-    });
+    if (activeTab === 'file') {
+      const file = uploadFile.files[0];
+      if (!file) { showFeedback('error', 'Please select an MP3 file.'); return; }
+
+      const form = new FormData();
+      form.append('title',  title);
+      form.append('artist', artist);
+      form.append('file',   file);
+
+      res = await fetch(`${API_URL}/api/songs`, {
+        method: 'POST',
+        headers: { 'x-api-key': apiKey },
+        body: form,
+      });
+    } else {
+      const url = uploadUrl.value.trim();
+      if (!url) { showFeedback('error', 'Please enter an MP3 URL.'); return; }
+
+      res = await fetch(`${API_URL}/api/songs/from-url`, {
+        method: 'POST',
+        headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, title, artist }),
+      });
+    }
 
     if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
@@ -299,6 +344,7 @@ uploadSubmit.addEventListener('click', async () => {
     uploadTitle.value  = '';
     uploadArtist.value = '';
     uploadFile.value   = '';
+    uploadUrl.value    = '';
     fileDropText.textContent = 'Drop MP3 here or click to browse';
     fileDrop.classList.remove('has-file');
 

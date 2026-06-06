@@ -538,6 +538,35 @@ body {
   gap: 16px;
 }
 
+/* ── Upload tabs ──────────────────────────────── */
+.upload-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.tab-btn:hover  { color: var(--text); }
+.tab-btn.active { background: var(--surface-3); color: var(--text); }
+
+.tab-pane        { display: block; }
+.tab-pane.hidden { display: none; }
+
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 
 .form-group label {
