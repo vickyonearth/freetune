@@ -250,12 +250,27 @@ tabBtns.forEach(btn => {
   });
 });
 
-// Auto-populate title/artist from URL filename
-uploadUrl.addEventListener('input', () => {
+// Convert GitHub blob URL → raw URL
+function toRawUrl(url) {
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'github.com' && u.pathname.includes('/blob/'))
+      return `https://raw.githubusercontent.com${u.pathname.replace('/blob/', '/')}`;
+  } catch { /* ignore */ }
+  return url;
+}
+
+// Auto-populate title/artist from URL filename + fix blob URLs
+uploadUrl.addEventListener('blur', () => {
   const raw = uploadUrl.value.trim();
   if (!raw) return;
+
+  // Silently rewrite GitHub blob → raw
+  const fixed = toRawUrl(raw);
+  if (fixed !== raw) uploadUrl.value = fixed;
+
   try {
-    const filename = decodeURIComponent(new URL(raw).pathname.split('/').pop());
+    const filename = decodeURIComponent(new URL(fixed).pathname.split('/').pop());
     const base     = filename.replace(/\.[^.]+$/, '').replace(/_/g, ' ').trim();
     const parts    = base.split(/\s+[-–]\s+/);
     uploadTitle.value  = parts[0].trim();
